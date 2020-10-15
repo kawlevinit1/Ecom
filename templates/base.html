@@ -65,8 +65,8 @@
                
                 <!-- User Login Info -->
                 <div class="user-login-info">
-                    {% if user.is_authenticated  %}
-                        <a href="/logout"><h6 style="color: blue;">{{user.username}}<br><br>logout</h6></a>
+                    {% if customer.is_authenticated %}
+                        <a href="/logout"><h6 style="color: blue;">{{customer.username}}<br><br>logout</h6></a>
                     {% else %}
                         <a href="/register"><img src="{% static 'img/core-img/user.svg' %}" alt=""></a>
                     {% endif %}

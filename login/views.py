@@ -2,6 +2,8 @@ from django.shortcuts import render,redirect
 from django.contrib import messages
 from django.contrib.auth.models import auth,User
 from django.http import HttpResponse
+from store.models.customer import Customer
+from django.contrib.auth.hashers import make_password ,check_password
 # Create your views here.
 
 def register(request):
@@ -13,52 +15,65 @@ def logout(request):
 
 
 def signin(request):
-    if request.method=='POST':
-        username=request.POST['username']
-        password=request.POST['password']
-
-        user=auth.authenticate(username=username,password=password)
-
-        if user is not None:
-            auth.login(request,user)
-            return redirect('/')
-
-        else:
-
-            messages.error(request,'Invalid Username ')
-            return redirect('/signin')
-
-    else :
+    if request.method=='GET':
         return render(request,'register.html')
 
+    else:
+        username=request.POST.get('username')
+        password=request.POST.get('password')
+        customer = Customer.get_by_username(username)
+        error_message = None
+
+        if customer:
+            flag = check_password(password ,customer.password)
+
+            if flag:
+                return redirect('/index')
+            else:
+                error_message = 'Email or Password Invalid'
+
+        else:
+            error_message = 'Email or Password Invalid'
+
+    return render(request,'index.html',{'error':error_message})
 
 def signup(request):
-    if request.method =='POST':
-        username=request.POST['username']
-        email=request.POST['email']
-        password1=request.POST['password1']
-        password2=request.POST['password2']
-
-        if password1==password2:
-            if User.objects.filter(username=username).exists():
-                messages.info(request,'Username Taken')
-                return redirect('/signup')
-            
-            elif User.objects.filter(email=email).exists():
-                messages.info(request,'Email Taken')
-                return redirect('/signup')
-
-            else:
-                user=User.objects.create_user(username=username,password=password1,email=email)
-                user.save();
-                return redirect('/signin')
-        
-        else:
-            messages.info(request,'Password Not Matching')
-            return redirect('/signup')
-        return redirect("/")
-
-    
-    else:
+    if request.method == 'GET':
 
         return render(request,'register.html')
+
+    else:
+        postData = request.POST
+        username = postData.get('username')
+        phone = postData.get('phone')
+        email = postData.get('email')
+        password = postData.get('password')
+        print(username,phone,email,password)
+        #valdation
+        
+        value = {
+            'username':username,
+            'phone':phone,
+            'email':email,
+        }
+        error_message =None
+        customer = Customer(username=username,phone=phone,email=email,password=password)
+        if (not username):
+            error_message =  "Username Required"
+        elif len(username) < 4:
+            error_message ="Username must be 4 char or long"
+        
+        isExists = customer.isExists()
+        if isExists:
+            error_message = 'Email Already taken'
+        #saving
+        if not error_message:
+            customer.password = make_password(customer.password)
+            customer.register()
+            return render(request,'register.html')
+        else:
+            data = {
+                    'error':error_message,
+                    'values':value
+            }
+            return render(request,'register.html', data)

@@ -30,7 +30,7 @@ a{color:inherit;text-decoration:none}
   height:100%;
   position:absolute;
   padding:90px 70px 50px 70px;
-  background:linear-gradient(brown,red);
+  background:radial-gradient(brown,black)
 }
 .login-html .sign-in-htm,
 .login-html .sign-up-htm{
@@ -159,11 +159,18 @@ a{color:inherit;text-decoration:none}
 </head>
 <body>
 <div class="login-wrap">
+
   <div class="login-html">
+    <div class="alert ">
+    {% csrf_token %}
+        {% if error %}
+         <h4 style="color: white">{{error}}</h4>
+        {% endif %}
+      </div>
     <input id="tab-1" type="radio" name="tab" class="sign-in" checked><label for="tab-1" class="tab">Sign In</label>
     <input id="tab-2" type="radio" name="tab" class="sign-up"><label for="tab-2" class="tab">Sign Up</label>
     <div class="login-form">
-    <form action="{% url 'signin' %}" method="post">
+    <form action="/signin" method="post">
           {% csrf_token %}
       <div class="sign-in-htm">
         <div class="group">
@@ -188,24 +195,25 @@ a{color:inherit;text-decoration:none}
       </div>
     </form>
     <form method="post" action="signup">
-        {% csrf_token %}
+      {% csrf_token %}
       <div class="sign-up-htm">
         <div class="group">
           <label for="user" class="label">Username</label>
-          <input id="user" type="text" class="input" name="username">
+          <input id="user" type="text" class="input" name="username" value="{{values.username}}">
+        </div>
+        <div class="group">
+          <label for="user" class="label">Phone No</label>
+          <input id="user" required type="text" class="input" name="phone" value="{{values.phone}}">
         </div>
         <div class="group">
           <label for="pass" class="label">Email Address</label>
-          <input id="pass" type="text" class="input" name="email">
+          <input id="pass" requiredtype="email" class="input" name="email" value="{{values.email}}">
         </div>
         <div class="group">
           <label for="pass" class="label">Password</label>
-          <input id="pass" name="password1" type="password" class="input" data-type="password">
+          <input id="pass" required name="password" type="password" class="input" data-type="password">
         </div>
-        <div class="group">
-          <label for="pass" class="label">Repeat Password</label>
-          <input id="pass" name="password2" type="password" class="input" data-type="password">
-        </div>
+        
         <div class="group">
           <input type="submit" class="button" value="Sign Up">
         </div>
